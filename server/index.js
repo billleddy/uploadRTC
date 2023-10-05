@@ -9,22 +9,16 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ...
+var destRoot = "/tmp/";  // root destination for all data
 
 const multer  = require('multer');
 const upload = multer({ dest: "/tmp" });  // os.tmpdir()
-/*
-var rawBodySaver = function (req, res, buf, encoding) {
-  if (buf && buf.length) {
-    req.rawBody = buf.toString(encoding || 'utf8');
-    console.log(req.rawBody);
-  }
-}
-*/
+
 app.post('/up', upload.single("streamfile"), function(req, res) {
   console.log("req.file= '", req.file, "'");
 
   // move the file from req.file.path to req.file.originalname . webm
-  var newPath = "/tmp/" + req.file.originalname + ".webm";
+  var newPath = destRoot + req.file.originalname + ".webm";
   fs.rename(req.file.path, newPath, function (err) {
     if (err) console.log("rename error=", err);    // throw err
     console.log("Successfully renamed to: ",  newPath);
@@ -33,15 +27,59 @@ app.post('/up', upload.single("streamfile"), function(req, res) {
   res.sendStatus(200);
 });
 
-app.post('/api/users', function(req, res) {
-  const user_id = req.body.id;
-  const token = req.body.token;
-  const geo = req.body.geo;
+app.post('/gamedata', upload.single("streamfile"), function(req, res) {
+  console.log("req.file= '", req.file, "'");
+
+  // move the file from req.file.path to req.file.originalname . webm
+  var newPath = destRoot + req.file.originalname;
+  fs.rename(req.file.path, newPath, function (err) {
+    if (err) console.log("rename error=", err);    // throw err
+    console.log("Successfully renamed to: ",  newPath);
+  })
+
+  res.sendStatus(200);
+});
+
+app.post("/user", function(req, res) {
+  const email = req.body.email;
+  const guid = req.body.guid;
+  var userRecord = email + "," + guid + "\n";
+
+  const fs = require('fs').promises;
+  try {
+      fs.appendFile(destRoot + "users", userRecord); 
+  } catch (error) {
+      console.log(error);
+  }
 
   res.send({
-    'user_id': user_id,
-    'token': token,
-    'geo': geo
+    'email': email,
+  });
+});
+
+app.post("/contact", function(req, res) {
+  const email = req.body.email;
+  const subject = req.body.subject;
+  const comment = req.body.comment;
+  const now = Date();
+  
+  var contactRecord = 
+    "========================\n" +
+      now.toLocaleString('en-US', { timeZone: 'UTC' }) + "UTC\n" +
+      subject + "\n" +
+      email + "\n" +
+      comment + "\n" +
+    "========================\n";
+
+  const fs = require('fs').promises;
+  try {
+      fs.appendFile(destRoot + "contact", contactRecord); 
+  } catch (error) {
+      console.log(error);
+  }
+
+  res.send({
+    'email': email,
   });
 });
 
