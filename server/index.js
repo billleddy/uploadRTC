@@ -1,13 +1,18 @@
 var express = require("express");
-const app = express();
+var app = express();
 const os = require("os");
 var cors = require("cors");
 const fs = require("fs");
+var https = require("https");
 
 app.use(cors())
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+var corsOptions = {
+  origin: '*',
+  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+}
 // ...
 var destRoot = "/tmp/";  // root destination for all data
 
@@ -41,9 +46,10 @@ app.post('/gamedata', upload.single("streamfile"), function(req, res) {
 });
 
 app.post("/user", function(req, res) {
+  const time = req.body.time;
   const email = req.body.email;
   const guid = req.body.guid;
-  var userRecord = email + "," + guid + "\n";
+  var userRecord = time + "," + email + "," + guid + "\n";
 
   const fs = require('fs').promises;
   try {
@@ -87,8 +93,21 @@ app.get("/", (request, response) => {
   response.send("Hi there");
 });
 
-app.listen(3001, () => {
-  console.log("Listen on the port 3001...");
+// for deployment
+var privateKey  = fs.readFileSync('../service/sslcert/outliar_net.key', 'utf8');
+var certificate = fs.readFileSync('../service/sslcert/outliar_net.crt', 'utf8');
+
+var credentials = {key: privateKey, cert: certificate};
+var server = https.createServer(credentials, app);
+server.listen(3001, function () {
+  console.log('CORS-enabled web server listening on port https 3001')
 });
+
+/* local testing
+app.listen(3001, () => {
+ console.log("Listen on the port 3001...");
+});
+*/
+
 
 // module.exports = router;
