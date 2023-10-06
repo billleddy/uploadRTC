@@ -1,3 +1,14 @@
+// Deployment notes:
+// open the port: 
+//     sudo firewall-cmd --list-all
+//     sudo firewall-cmd --zone=public --permanent --add-port 3001/tcp
+//     sudo firewall-cmd --reload
+//     firewall-cmd --list-all
+//
+// Change the listening to httpS at the end
+//
+// run : node index.js
+
 var express = require("express");
 var app = express();
 const os = require("os");
