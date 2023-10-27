@@ -25,10 +25,10 @@ var corsOptions = {
   optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 }
 // ...
-var destRoot = "/tmp/";  // root destination for all data
+var destRoot = "./results/";  // root destination for all data
 
 const multer  = require('multer');
-const upload = multer({ dest: "/tmp" });  // os.tmpdir()
+const upload = multer({ dest: "./results/" });  // os.tmpdir()
 
 app.post('/up', upload.single("streamfile"), function(req, res) {
   console.log("req.file= '", req.file, "'");
@@ -62,6 +62,7 @@ app.post("/user", function(req, res) {
   const guid = req.body.guid;
   var userRecord = time + "," + email + "," + guid + "\n";
 
+  console.log("user = ", userRecord);
   const fs = require('fs').promises;
   try {
       fs.appendFile(destRoot + "users", userRecord); 
@@ -100,25 +101,53 @@ app.post("/contact", function(req, res) {
   });
 });
 
+app.post("/abuse", function(req, res) {
+  const game = req.body.game;
+  const from = req.body.from;
+  const now = Date();
+  
+  var abuseRecord = 
+    "========================\n" +
+      now.toLocaleString('en-US', { timeZone: 'UTC' }) + "UTC\n" +
+      "game:" + game + "\n" +
+      "from:" + from + "\n" +
+    "========================\n";
+  // console.log("abuseRecord=", abuseRecord);
+
+  const fs = require('fs').promises;
+  try {
+      fs.appendFile(destRoot + "abuse", abuseRecord); 
+  } catch (error) {
+      console.log(error);
+  }
+
+  res.send({
+    'game': game,
+  });
+});
+
 app.get("/", (request, response) => {
   response.send("Hi there");
 });
 
 // for deployment
+/*
 var privateKey  = fs.readFileSync('../service/sslcert/outliar_net.key', 'utf8');
 var certificate = fs.readFileSync('../service/sslcert/outliar_net.crt', 'utf8');
+
 
 var credentials = {key: privateKey, cert: certificate};
 var server = https.createServer(credentials, app);
 server.listen(3001, function () {
   console.log('CORS-enabled web server listening on port https 3001')
 });
+*/
 
-/* local testing
+/* local testing */
 app.listen(3001, () => {
  console.log("Listen on the port 3001...");
 });
-*/
+
 
 
 // module.exports = router;
