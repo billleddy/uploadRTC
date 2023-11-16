@@ -1,2 +1,7 @@
 .DS_Store
 server/results/users
+server/results/abuse
+server/results/abuse
+.gitignore
+server/results/abuse
+server/results/abuse

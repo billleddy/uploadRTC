@@ -26,15 +26,44 @@ var corsOptions = {
 }
 // ...
 var destRoot = "./results/";  // root destination for all data
+var interviewDest = destRoot + "interviews/";
 
 const multer  = require('multer');
 const upload = multer({ dest: "./results/" });  // os.tmpdir()
+const interviewUp = multer({ dest: interviewDest });
 
 app.post('/up', upload.single("streamfile"), function(req, res) {
   console.log("req.file= '", req.file, "'");
 
   // move the file from req.file.path to req.file.originalname . webm
   var newPath = destRoot + req.file.originalname + ".webm";
+  fs.rename(req.file.path, newPath, function (err) {
+    if (err) console.log("rename error=", err);    // throw err
+    console.log("Successfully renamed to: ",  newPath);
+  })
+
+  res.sendStatus(200);
+});
+
+app.post('/interviewUp', interviewUp.single("streamfile"), function(req, res) {
+  console.log("req.file= '", req.file, "'");
+
+  // move the file from req.file.path to req.file.originalname . webm
+  var newPath = interviewDest + req.file.originalname + ".webm";
+  fs.rename(req.file.path, newPath, function (err) {
+    if (err) console.log("rename error=", err);    // throw err
+    console.log("Successfully renamed to: ",  newPath);
+  })
+
+  res.sendStatus(200);
+});
+
+// InterviewData not used ?
+app.post('/interviewData', interviewUp.single("streamfile"), function(req, res) {
+  console.log("req.file= '", req.file, "'");
+
+  // move the file from req.file.path to req.file.originalname . webm
+  var newPath = interviewDest + req.file.originalname;
   fs.rename(req.file.path, newPath, function (err) {
     if (err) console.log("rename error=", err);    // throw err
     console.log("Successfully renamed to: ",  newPath);
@@ -131,7 +160,6 @@ app.get("/", (request, response) => {
 });
 
 // for deployment
-/*
 var privateKey  = fs.readFileSync('../service/sslcert/outliar_net.key', 'utf8');
 var certificate = fs.readFileSync('../service/sslcert/outliar_net.crt', 'utf8');
 
@@ -141,13 +169,13 @@ var server = https.createServer(credentials, app);
 server.listen(3001, function () {
   console.log('CORS-enabled web server listening on port https 3001')
 });
-*/
 
-/* local testing */
+
+/* local testing
 app.listen(3001, () => {
  console.log("Listen on the port 3001...");
 });
-
+*/
 
 
 // module.exports = router;
