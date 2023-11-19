@@ -49,7 +49,11 @@ app.post('/interviewUp', interviewUp.single("streamfile"), function(req, res) {
   console.log("req.file= '", req.file, "'");
 
   // move the file from req.file.path to req.file.originalname . webm
-  var newPath = interviewDest + req.file.originalname + ".webm";
+  var newPath = interviewDest; 
+  if (req.file.originalname.endsWith("_txt")) {
+     newPath += req.file.originalname.replace("_txt", ".csv");
+  }
+  else newPath += req.file.originalname + ".webm";
   fs.rename(req.file.path, newPath, function (err) {
     if (err) console.log("rename error=", err);    // throw err
     console.log("Successfully renamed to: ",  newPath);
